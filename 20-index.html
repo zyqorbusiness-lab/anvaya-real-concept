@@ -157,9 +157,9 @@ h1 span{display:block}h1 em{color:var(--gold2)}
 .cap{position:absolute;bottom:5vh;left:0;right:0;font:italic 400 clamp(1rem,2vw,1.4rem) var(--serif);color:var(--gold2);z-index:4;text-shadow:0 1px 10px #0007}
 /* legacy */
 .s-legacy .stage{background:var(--cream);color:#201214}
-.mini{position:absolute;top:10vh;left:50%;width:120px;margin-left:-60px;color:#8a1f2c}
+.mini{position:absolute;top:9vh;left:50%;width:84px;margin-left:-42px;color:#8a1f2c}
 .mini svg{width:100%;fill:none;stroke:currentColor;stroke-width:.6}
-.legacy-in{position:relative;z-index:2;padding:0 6vw}
+.legacy-in{position:relative;z-index:2;padding:14vh 6vw 0}
 .legacy-in h2{font-family:var(--serif);font-weight:400;font-size:clamp(2.6rem,8vw,6.4rem);line-height:1;margin:0 0 22px}
 .legacy-in h2 span{display:block}.legacy-in h2 em{color:#8c1a28}
 .legacy-in p{max-width:46ch;margin:0 auto 28px;line-height:1.7;color:#4a3a36}
@@ -176,6 +176,8 @@ h1 span{display:block}h1 em{color:var(--gold2)}
 .fcols span{display:block;max-width:30ch;opacity:.75}
 .giant{font:500 clamp(3rem,20vw,22rem)/.8 var(--serif);letter-spacing:.02em;text-align:center;background:linear-gradient(180deg,#f2dca0,#a9792b 70%,#5e101c);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap;margin-bottom:-2vh}
 /* static / reduced motion */
+.static header,.static header.dk{background:#14070aeb;color:var(--cream);backdrop-filter:blur(12px)}
+.static header .pill:hover{background:#ffffff1c}
 .static .will{transform:none!important}
 .static .s-expr .stage{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5vh}
 .static .eword.g{display:none}
@@ -210,6 +212,7 @@ nav{display:none}
 .carry-cap{top:auto;bottom:22vh;max-width:18ch}
 .fig{height:46vh}
 .fig.l{margin-left:calc(46vh*-.75 - 2vw)}
+.eword{font-size:11.2vw}
 .fcols{flex-direction:column;gap:14px;text-align:center}
 .fcols span{margin:0 auto}
 .goddess{width:min(64vw,46vh)}
@@ -490,15 +493,15 @@ var U={
  },
 "s-expr":function(s,p){var r=s.r;
   var a=seg(p,0,.3),b=seg(p,.15,.5);
-  T(r.eg,lerp(-vw()*.15,vw()*.08,p),0);O(r.eg,seg(p,0,.15));
-  T(r.ew,lerp(vw()*.1,-vw()*.04,p),0);O(r.ew,seg(p,0,.15));
+  T(r.eg,lerp(-vw()*.12,vw()*.05,p)*(vw()<=700?.4:1),0);O(r.eg,seg(p,0,.15));
+  T(r.ew,lerp(vw()*.08,0,seg(p,0,.5)),0);O(r.ew,seg(p,0,.15));
   T(r.fl,0,lerp(VH*.9,0,a));T(r.fr,0,lerp(VH*.9,0,b));
   scrub(motVid,seg(p,.15,.95));
   T(r.cp,0,lerp(20,0,seg(p,.5,.7)));O(r.cp,seg(p,.5,.7));
  },
 "s-legacy":function(s,p){var r=s.r;
   r.mn.style.transform="rotate("+(p*220)+"deg) scale("+lerp(.4,1,seg(p,0,.3))+")";O(r.mn,seg(p,0,.2));
-  [["a",.08],["b",.18],["c",.32],["d",.44]].forEach(function(q){var k=seg(p,q[1],q[1]+.2);T(r[q[0]],0,lerp(40,0,k));O(r[q[0]],k)});
+  [["a",.08],["b",.18],["c",.32],["d",.44]].forEach(function(q){var k=seg(p,q[1],q[1]+.2);T(r[q[0]],0,lerp(40,0,k));O(r[q[0]],k)});r.d.style.pointerEvents=seg(p,.44,.64)>.5||staticMode?"auto":"none";
  },
 "s-foot":function(s,p){var r=s.r;
   T(r.t,0,lerp(50,0,seg(p,0,.35)));O(r.t,seg(p,0,.35));
@@ -509,18 +512,18 @@ var U={
 function run(s,p){var k=s.cls.split(" ")[0];if(U[k])U[k](s,p)}
 
 /* scroll loop */
-var tgt=0,cur=0,active=false,headerCls="";
+var tgt=0,cur=0,active=false,headerCls="",lastF=performance.now();
 function progressOf(s,y){return clamp((y-s.top)/s.len,0,1)}
 var smooth=new Map();
 function frame(){
-  var y=window.scrollY||0;
+  var y=window.scrollY||0,now=performance.now(),dt=Math.min(now-lastF,250);lastF=now;var k=document.hidden?1:1-Math.exp(-dt/85);
   scenes.forEach(function(s){
     var inView=y>s.top-VH*1.1&&y<s.top+s.len+VH*1.1;
     var t=progressOf(s,y);
     if(!inView){if(s.edge===t)return;s.edge=t;smooth.set(s,t);run(s,t);return}
     s.edge=null;
     var c=smooth.has(s)?smooth.get(s):t;
-    c=Math.abs(t-c)<.0008?t:c+(t-c)*.16;smooth.set(s,c);run(s,c);
+    c=Math.abs(t-c)<.0008?t:c+(t-c)*k;smooth.set(s,c);run(s,c);
   });
   var cs=scenes.filter(function(s){return y>=s.top-VH*.5&&y<s.top+s.len+VH*.5})[0]||scenes[0];
   var hc=cs.nav==="dk"?"dk":"";if(hc!==headerCls){headerCls=hc;$("#nav").className=hc}
